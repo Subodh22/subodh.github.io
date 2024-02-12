@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Upload for API Processing</title>
+</head>
+<body>
+    <h1>Upload an Image</h1>
+    <input type="file" id="imageInput" accept="image/*">
+    <button id="uploadButton">Upload</button>
+    <div id="result"></div>
+
+    <script>
+        document.getElementById('uploadButton').addEventListener('click', async () => {
+            const imageInput = document.getElementById('imageInput');
+            if (imageInput.files.length > 0) {
+                const imageFile = imageInput.files[0];
+
+                // Convert the image file to a blob
+                const reader = new FileReader();
+                reader.readAsArrayBuffer(imageFile);
+                reader.onload = async () => {
+                    const blob = new Blob([reader.result], { type: imageFile.type });
+                    
+                    // Here you would replace 'Subodh22/BearRecog' with your actual Gradio app name
+                    // and ensure your endpoint URL is correct.
+                    const response_0 = await fetch(blob);
+                    const exampleImage = await response_0.blob();
+                    
+                    // Assuming your API is set up to accept a POST request with the image blob
+                    // Adjust the fetch URL to your actual Gradio app's API endpoint
+                    fetch('https://api.gradio.app/v1/runtime/Subodh22/BearRecog/predict/', {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            data: [exampleImage]
+                        }),
+                        headers: {
+                            'Content-Type': 'application/json',
+                            // If needed, add your Hugging Face token here
+                            'Authorization': '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'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Success:', data);
+                        document.getElementById('result').textContent = JSON.stringify(data, null, 2);
+                    })
+                    .catch((error) => {
+                        console.error('Error:', error);
+                        document.getElementById('result').textContent = 'Error processing your image.';
+                    });
+                };
+            }
+        });
+    </script>
+</body>
+</html>
